@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Surya- Web Projects</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background: #333;
+      color: white;
+      padding: 15px;
+      text-align: center;
+    }
+    nav {
+      display: flex;
+      justify-content: center;
+      background: #444;
+    }
+    nav button {
+      padding: 10px 20px;
+      background: #444;
+      border: none;
+      color: white;
+      cursor: pointer;
+    }
+    nav button:hover, nav button.active {
+      background: #222;
+    }
+    section {
+      display: none;
+      padding: 20px;
+    }
+    section.active {
+      display: block;
+    }
+    /* To-Do & Product styles */
+    input, select, textarea, button {
+      padding: 8px;
+      margin: 5px 0;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+    li {
+      background: #fff;
+      margin: 5px 0;
+      padding: 10px;
+      border: 1px solid #ddd;
+      display: flex;
+      justify-content: space-between;
+    }
+    .product-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+ .product {
+      background: #fff;
+      padding: 15px;
+      width: 200px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Surya's Combined Projects</h1>
+  </header>
+
+  <nav>
+    <button class="tab-btn active" onclick="showSection('portfolio')">Portfolio</button>
+    <button class="tab-btn" onclick="showSection('todo')">To-Do List</button>
+    <button class="tab-btn" onclick="showSection('products')">Product Listing</button>
+  </nav>
+
+  <!-- Portfolio Section -->
+  <section id="portfolio" class="active">
+    <h2>About Me</h2>
+    <p>I’m a Computer Science graduate passionate about web development and data science.</p>
+    <h2>Projects</h2>
+    <ul>
+      <li>To-do List App</li>
+      <li>Product Listing Page</li>
+      <li>This Portfolio Website</li>
+    </ul>
+    <h2>Contact</h2>
+    <form>
+      <input type="text" placeholder="Your Name" required /><br />
+      <input type="email" placeholder="Your Email" required /><br />
+      <textarea placeholder="Your Message" required></textarea><br />
+      <button type="submit">Send</button>
+    </form>
+  </section>
+<!-- To-Do List Section -->
+  <section id="todo">
+    <h2>To-Do List</h2>
+    <input type="text" id="taskInput" placeholder="Enter a new task" />
+    <button onclick="addTask()">Add Task</button>
+    <ul id="taskList"></ul>
+  </section>
+
+  <!-- Product Listing Section -->
+  <section id="products">
+    <h2>Product Listing</h2>
+    <label>Filter by Category:
+      <select id="categoryFilter" onchange="filterProducts()">
+        <option value="all">All</option>
+        <option value="electronics">Electronics</option>
+        <option value="fashion">Fashion</option>
+      </select>
+    </label>
+    <label>Sort by Rating:
+      <select id="sortSelect" onchange="filterProducts()">
+        <option value="high">High to Low</option>
+        <option value="low">Low to High</option>
+      </select>
+    </label>
+    <div id="productContainer" class="product-container"></div>
+  </section>
+
+  <script>
+    // Tab Switching
+    function showSection(id) {
+      document.querySelectorAll("section").forEach(sec => sec.classList.remove("active"));
+      document.querySelectorAll(".tab-btn").forEach(btn => btn.classList.remove("active"));
+      document.getElementById(id).classList.add("active");
+      document.querySelector(`button[onclick="showSection('${id}')"]`).classList.add("active");
+    }
+// To-Do App
+    function addTask() {
+      const input = document.getElementById("taskInput");
+      const task = input.value.trim();
+      if (task) {
+        let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+        tasks.push(task);
+        localStorage.setItem("tasks", JSON.stringify(tasks));
+        input.value = "";
+        loadTasks();
+      }
+    }
+
+    function loadTasks() {
+      const taskList = document.getElementById("taskList");
+      taskList.innerHTML = "";
+      let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+      tasks.forEach((task, index) => {
+        const li = document.createElement("li");
+        li.innerHTML = `
+          <span>${task}</span>
+          <button onclick="removeTask(${index})">Delete</button>
+        `;
+        taskList.appendChild(li);
+      });
+    }
+
+    function removeTask(index) {
+      let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+      tasks.splice(index, 1);
+      localStorage.setItem("tasks", JSON.stringify(tasks));
+      loadTasks();
+    }
+
+    // Product Listing
+    const products = [
+      { name: "Laptop", category: "electronics", rating: 4.5 },
+      { name: "Smartphone", category: "electronics", rating: 4.2 },
+      { name: "T-Shirt", category: "fashion", rating: 3.9 },
+      { name: "Jeans", category: "fashion", rating: 4.1 }
+    ];
+
+    function filterProducts() {
+      const category = document.getElementById("categoryFilter").value;
+      const sort = document.getElementById("sortSelect").value;
+
+      let filtered = products.filter(p => category === "all" || p.category === category);
+      filtered.sort((a, b) => sort === "high" ? b.rating - a.rating : a.rating - b.rating);
+
+      const container = document.getElementById("productContainer");
+      container.innerHTML = "";
+      filtered.forEach(p => {
+        const div = document.createElement("div");
+        div.className = "product";
+        div.innerHTML = `'<h3>${p.name}</h3><p>Category: ${p.category}</p><p>Rating: ${p.rating}</p>'`;
+        container.appendChild(div);
+      });
+    }
+
+    // Initial Load
+    window.onload = () => {
+      loadTasks();
+      filterProducts();
+    };
+  </script>
+
+</body>
+</html>
